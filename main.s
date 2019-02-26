@@ -46,6 +46,7 @@ DataBuffer   SPACE 100; allocate space for 8-bit 100 space array
 TimeBuffer	 SPACE 400; time array with 100 spaces for 32-bit data
 DataPt	SPACE 4	; 8-bit number to go to 100
 TimePt	SPACE 4	; 16 bit number to go to 400
+PTime	Space 4
 
 ;place your debug variables in RAM here
 
@@ -169,9 +170,12 @@ Wait
 Debug_Init 
 	PUSH {R0-R4,LR}
 	MOV R1, #0x00000000
-	LDR R0, DataPt
+	LDR R0, =DataPt
 	STR R1, [R0]
-	LDR R0, TimePt
+	LDR R0, =TimePt
+	STR R1, [R0]
+	LDR R0, =PTime
+	MOV R1, #0x00FFFFFF
 	STR R1, [R0]
 	BL SysTick_Init
 	LDR R0, =DataBuffer
@@ -190,7 +194,6 @@ TimeFF
 	ADD R2, R2, #1
 	CMP R2, #101
 	BNE TimeFF
-	BX LR
 	
 
       POP {R0-R4,PC}
@@ -198,18 +201,32 @@ TimeFF
 Debug_Capture 
       PUSH {R0-R6,LR}
 	  LDR R0, =DataBuffer
-	  MOV R1, #99
-	  ADD R0, R1
-	  LDRB R1, [R0]
-	  CMP R1, #0xFF
-	  BNE LR ; // NEED TO ASK WHAT THE F TO DO
-	  
-	  LDR R1, =NVIC_ST_CURRENT_R
+	  LDR R1, =DataPt
 	  LDR R2, [R1]
-	  STR R2, [R0]
-	BX LR
+	  CMP R2, #100	;R2 has the index for databuffer
+	  BNE LR ; // NEED TO ASK WHAT THE F TO DO
+	  LDR R4, =GPIO_PORTE_DATA_R
+	  LDRB R3, [R4]
+	  LDR R6, =GPIO_PORTA_DATA_R
+	  LDRB R5, [R6]
+	  ORR R3, R5
+	  STRB R3, [R0,R2]
+	  ADD R2, #1
+	  STR R2, [R1]
+	  LDR R0, =TimeBuffer
+	  LDR R1, = TimePt
+	  LDR R2, [R1]
+	  LDR R4, =NVIC_ST_CURRENT_R
+	  LDR R3, [R4]; data of timer
+	  LDR R4, =PTime
+	  LDR R5, [R4]
+	  SUB R5, R3
+	  STR R3, [R4]
+	  STR R5, [R0, R1]
+	  ADD R2, #4
+	  STR R2, [R1]
       POP  {R0-R6,PC}
-	  
+      
 Heartbeat_Init
 	LDR R0, =SYSCTL_RCGCGPIO_R
 	LDR R1, [R0]
@@ -218,7 +235,7 @@ Heartbeat_Init
 	NOP
 	NOP
 	NOP
-	NOP
+	NOP,
 	LDR R0, =GPIO_PORTF_DIR_R
 	LDR R1, [R0]
 	MOV R1, #0x04 ;// bit 3 (PF2) in port F is output LED
