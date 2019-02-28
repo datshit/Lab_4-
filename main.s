@@ -173,10 +173,9 @@ Debug_Init
 	MOV R1, #0x00000000
 	STR R1, [R0]
 	LDR R0, =TimePt
-	MOV R1, #0x00FFFFFF
 	STR R1, [R0]
-	LDR R0, =PTime
 	MOV R1, #0x00FFFFFF
+	LDR R0, =PTime
 	STR R1, [R0]
 	BL SysTick_Init
 	LDR R0, =DataBuffer
@@ -205,7 +204,7 @@ Debug_Capture
 	  LDR R1, =DataPt
 	  LDR R2, [R1]
 	  CMP R2, #100	;R2 has the index for databuffer
-	  BEQ Branch ; // NEED TO ASK WHAT THE F TO DO
+	  BEQ Branch ; 
 	  LDR R4, =GPIO_PORTE_DATA_R
 	  LDRB R3, [R4]
 	  LDR R6, =GPIO_PORTA_DATA_R
@@ -215,15 +214,15 @@ Debug_Capture
 	  ADD R2, #1
 	  STR R2, [R1]
 	  LDR R0, =TimeBuffer
-	  LDR R1, = TimePt
-	  LDR R2, [R1]
+	  LDR R1, =TimePt
+	  LDR R2, [R1]					; value of time pointer
 	  LDR R4, =NVIC_ST_CURRENT_R
-	  LDR R3, [R4]; data of timer
-	  LDR R4, =PTime
+	  LDR R3, [R4]					; data of timer
+	  LDR R4, =PTime				; address of previous time
 	  LDR R5, [R4]
 	  SUB R5, R3
 	  STR R3, [R4]
-	  STR R5, [R0, R1]
+	  STR R5, [R0, R2]
 	  ADD R2, #4
 	  STR R2, [R1]
 Branch
@@ -276,6 +275,7 @@ SendDataToLogicAnalyzer
 
       ALIGN      ; make sure the end of this section is aligned
       END        ; end of file
+
 
 
 
