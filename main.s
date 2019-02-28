@@ -46,7 +46,7 @@ DataBuffer   SPACE 100; allocate space for 8-bit 100 space array
 TimeBuffer	 SPACE 400; time array with 100 spaces for 32-bit data
 DataPt	SPACE 4	; 8-bit number to go to 100
 TimePt	SPACE 4	; 16 bit number to go to 400
-PTime	Space 4
+PTime	SPACE 4
 
 ;place your debug variables in RAM here
 
@@ -75,7 +75,7 @@ Start
       CPSIE  I    ; TExaS logic analyzer runs on interrupts
       MOV  R5,#0  ; last PA4
 loop  
-	B Heartbeat
+	BL Heartbeat
       LDR  R1,=GPIO_PORTA_DATA_R
       LDR  R4,[R1]  ;current value of switch
       AND  R4,R4,#0x10 ; select just bit 4
@@ -169,10 +169,11 @@ Wait
       
 Debug_Init 
 	PUSH {R0-R4,LR}
-	MOV R1, #0x00000000
 	LDR R0, =DataPt
+	MOV R1, #0x00000000
 	STR R1, [R0]
 	LDR R0, =TimePt
+	MOV R1, #0x00FFFFFF
 	STR R1, [R0]
 	LDR R0, =PTime
 	MOV R1, #0x00FFFFFF
@@ -184,7 +185,7 @@ Debug_Init
 StoreFF
 	STRB R3, [R0, R2]
 	ADD R2, R2, #1
-	CMP R2, #101
+	CMP R2, #100
 	BNE StoreFF
 	LDR R0, =TimeBuffer
 	MOV R2, #0
@@ -192,7 +193,7 @@ StoreFF
 TimeFF
 	STR R3, [R0, R2, LSL #2]
 	ADD R2, R2, #1
-	CMP R2, #101
+	CMP R2, #100
 	BNE TimeFF
 	
 
@@ -204,7 +205,7 @@ Debug_Capture
 	  LDR R1, =DataPt
 	  LDR R2, [R1]
 	  CMP R2, #100	;R2 has the index for databuffer
-	  BNE LR ; // NEED TO ASK WHAT THE F TO DO
+	  BEQ Branch ; // NEED TO ASK WHAT THE F TO DO
 	  LDR R4, =GPIO_PORTE_DATA_R
 	  LDRB R3, [R4]
 	  LDR R6, =GPIO_PORTA_DATA_R
@@ -225,7 +226,8 @@ Debug_Capture
 	  STR R5, [R0, R1]
 	  ADD R2, #4
 	  STR R2, [R1]
-      POP  {R0-R6,PC}
+Branch
+	POP  {R0-R6,PC}
       
 Heartbeat_Init
 	LDR R0, =SYSCTL_RCGCGPIO_R
@@ -235,7 +237,7 @@ Heartbeat_Init
 	NOP
 	NOP
 	NOP
-	NOP,
+	NOP
 	LDR R0, =GPIO_PORTF_DIR_R
 	LDR R1, [R0]
 	MOV R1, #0x04 ;// bit 3 (PF2) in port F is output LED
@@ -274,4 +276,6 @@ SendDataToLogicAnalyzer
 
       ALIGN      ; make sure the end of this section is aligned
       END        ; end of file
+
+
 
