@@ -23,16 +23,16 @@ NVIC_ST_CURRENT_R     EQU 0xE000E018
 SysTick_Init
  ; **-UUU-**Implement this function****
 	    ; disable SysTick during setup
-    LDR R1, =NVIC_ST_CTRL_R         ; R1 = &NVIC_ST_CTRL_R
-    MOV R0, #0                      ; R0 = 0
-    STR R0, [R1]                    ; [R1] = R0 = 0
+    LDR R0, =NVIC_ST_CTRL_R         ; R1 = &NVIC_ST_CTRL_R
+    MOV R1, #0                      ; R0 = 0
+    STR R1, [R0]                    ; [R1] = R0 = 0
     ; maximum reload value
     LDR R0, =NVIC_ST_RELOAD_R       ; R1 = &NVIC_ST_RELOAD_R
     MOV R1, #0x00FFFFFF;      ; R0 = NVIC_ST_RELOAD_M
-    STR R0, [R1]                    ; [R1] = R0 = NVIC_ST_RELOAD_M
+    STR R1, [R0]                    ; [R1] = R0 = NVIC_ST_RELOAD_M
     ; any write to current clears it
-    LDR R1, =NVIC_ST_CURRENT_R      ; R1 = &NVIC_ST_CURRENT_R
-    MOV R0, #0                      ; R0 = 0
+    LDR R0, =NVIC_ST_CURRENT_R      ; R1 = &NVIC_ST_CURRENT_R
+    MOV R1, #0                      ; R0 = 0
     STR R0, [R1]                    ; [R1] = R0 = 0
     ; enable SysTick with core clock
     LDR R1, =NVIC_ST_CTRL_R         ; R1 = &NVIC_ST_CTRL_R
