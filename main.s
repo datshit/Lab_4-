@@ -221,6 +221,7 @@ Debug_Capture
 	  LDR R4, =PTime				; address of previous time
 	  LDR R5, [R4]
 	  SUB R5, R3
+	  AND R5, R5, #0x00FFFFFF	; only need first 24 bits
 	  STR R3, [R4]
 	  STR R5, [R0, R2]
 	  ADD R2, #4
